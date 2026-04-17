@@ -98,12 +98,12 @@ def build_message(rsi_value: float, status: str, strategy: str,
                   tqqq_price: float, tqqq_change: float,
                   qld_price: float, qld_change: float) -> str:
     return (
-        f"*\\[QQQ RSI 알림\\]*\n\n"
-        f"QQQ RSI(14): {rsi_value:.1f}\n"
-        f"상태: {status}\n\n"
-        f"TQQQ: ${tqqq_price:.2f} ({tqqq_change:+.1f}%)\n"
-        f"QLD: ${qld_price:.2f} ({qld_change:+.1f}%)\n\n"
-        f"전략 체크: {strategy}"
+        f"*QQQ RSI 시그널*\n\n"
+        f"QQQ RSI(14) : {rsi_value:.1f}\n"
+        f"상태 : {status}\n\n"
+        f"TQQQ : ${tqqq_price:.2f} ({tqqq_change:+.1f}%)\n"
+        f"QLD : ${qld_price:.2f} ({qld_change:+.1f}%)\n\n"
+        f"전략 체크 : {strategy}"
     )
 
 
