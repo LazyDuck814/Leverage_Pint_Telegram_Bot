@@ -1,3 +1,4 @@
 yfinance
-pandas-ta-classic
+pandas
 requests
+pandas_market_calendars
