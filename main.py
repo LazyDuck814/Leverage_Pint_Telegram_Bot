@@ -38,20 +38,61 @@ def is_us_market_open_today() -> bool:
     return not schedule.empty
 
 
-def calculate_rsi(close_series: pd.Series, period: int = 14) -> pd.Series:
+def calculate_rsi_wilder(close_series: pd.Series, period: int = 14) -> pd.Series:
     """
-    Wilder RSI 계산
+    Wilder RSI
+    - 첫 avg_gain / avg_loss는 SMA로 초기화
+    - 이후 Wilder smoothing 적용
     """
     delta = close_series.diff()
 
     gain = delta.clip(lower=0)
     loss = -delta.clip(upper=0)
 
-    avg_gain = gain.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
-    avg_loss = loss.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
+    rsi = pd.Series(index=close_series.index, dtype=float)
+
+    if len(close_series) < period + 1:
+        return rsi
+
+    avg_gain = gain.iloc[1:period + 1].mean()
+    avg_loss = loss.iloc[1:period + 1].mean()
+
+    if avg_loss == 0:
+        rsi.iloc[period] = 100.0
+    else:
+        rs = avg_gain / avg_loss
+        rsi.iloc[period] = 100 - (100 / (1 + rs))
+
+    for i in range(period + 1, len(close_series)):
+        avg_gain = (avg_gain * (period - 1) + gain.iloc[i]) / period
+        avg_loss = (avg_loss * (period - 1) + loss.iloc[i]) / period
+
+        if avg_loss == 0:
+            rsi.iloc[i] = 100.0
+        else:
+            rs = avg_gain / avg_loss
+            rsi.iloc[i] = 100 - (100 / (1 + rs))
+
+    return rsi
+
+
+def calculate_rsi_cutler(close_series: pd.Series, period: int = 14) -> pd.Series:
+    """
+    Cutler RSI
+    - 최근 period개의 gain/loss 단순평균(SMA) 사용
+    """
+    delta = close_series.diff()
+
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+
+    avg_gain = gain.rolling(window=period, min_periods=period).mean()
+    avg_loss = loss.rolling(window=period, min_periods=period).mean()
 
     rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))
+    rsi = rsi.where(avg_loss != 0, 100.0)
+
     return rsi
 
 
@@ -88,18 +129,30 @@ def get_qqq_rsi(period: int = 14):
         raise ValueError("QQQ RSI 계산에 필요한 데이터가 부족합니다.")
 
     close_series = data["Close"].squeeze()
-    rsi_series = calculate_rsi(close_series, period=period)
-    rsi_value = float(rsi_series.dropna().iloc[-1])
 
-    return rsi_value
+    wilder_rsi_series = calculate_rsi_wilder(close_series, period=period)
+    cutler_rsi_series = calculate_rsi_cutler(close_series, period=period)
+
+    wilder_rsi_value = float(wilder_rsi_series.dropna().iloc[-1])
+    cutler_rsi_value = float(cutler_rsi_series.dropna().iloc[-1])
+
+    return wilder_rsi_value, cutler_rsi_value
 
 
-def build_message(rsi_value: float, status: str, strategy: str,
-                  tqqq_price: float, tqqq_change: float,
-                  qld_price: float, qld_change: float) -> str:
+def build_message(
+    wilder_rsi: float,
+    cutler_rsi: float,
+    status: str,
+    strategy: str,
+    tqqq_price: float,
+    tqqq_change: float,
+    qld_price: float,
+    qld_change: float
+) -> str:
     return (
         f"*QQQ RSI 시그널*\n\n"
-        f"QQQ RSI(14) : {rsi_value:.1f}\n"
+        f"RSI Wilder : {wilder_rsi:.1f}\n"
+        f"RSI Cutler : {cutler_rsi:.1f}\n"
         f"상태 : {status}\n\n"
         f"TQQQ : ${tqqq_price:.2f} ({tqqq_change:+.1f}%)\n"
         f"QLD : ${qld_price:.2f} ({qld_change:+.1f}%)\n\n"
@@ -113,23 +166,27 @@ def check_market():
         print("오늘은 미국 휴장일입니다. 알림을 보내지 않습니다.")
         return
 
-    rsi_value = get_qqq_rsi(period=14)
+    wilder_rsi, cutler_rsi = get_qqq_rsi(period=14)
 
     tqqq_price, tqqq_change = get_price_and_change("TQQQ")
     qld_price, qld_change = get_price_and_change("QLD")
 
-    if rsi_value <= 30:
+    # 상태 판단은 일단 Cutler 기준
+    signal_rsi = cutler_rsi
+
+    if signal_rsi <= 30:
         status = "과매도"
         strategy = "TQQQ 1주 + QLD 1주 추가매수 고려 구간"
-    elif rsi_value >= 70:
+    elif signal_rsi >= 70:
         status = "과매수"
         strategy = "반등장 비중조절 검토 구간"
     else:
-        print(f"조건 미충족: RSI={rsi_value:.1f}")
+        print(f"조건 미충족: Wilder={wilder_rsi:.1f}, Cutler={cutler_rsi:.1f}")
         return
 
     message = build_message(
-        rsi_value=rsi_value,
+        wilder_rsi=wilder_rsi,
+        cutler_rsi=cutler_rsi,
         status=status,
         strategy=strategy,
         tqqq_price=tqqq_price,
