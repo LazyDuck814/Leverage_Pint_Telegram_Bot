@@ -67,9 +67,9 @@ def get_price_and_change(ticker: str):
     if data.empty or len(data) < 2:
         raise ValueError(f"{ticker} 가격 데이터를 충분히 가져오지 못했습니다.")
 
-    close_col = "Close"
-    current_price = float(data[close_col].iloc[-1])
-    prev_close = float(data[close_col].iloc[-2])
+    close_series = data["Close"].squeeze()
+    current_price = float(close_series.iloc[-1])
+    prev_close = float(close_series.iloc[-2])
     change_pct = ((current_price - prev_close) / prev_close) * 100
 
     return current_price, change_pct
@@ -87,9 +87,9 @@ def get_qqq_rsi(period: int = 14):
     if data.empty or len(data) < period + 1:
         raise ValueError("QQQ RSI 계산에 필요한 데이터가 부족합니다.")
 
-    close_series = data["Close"]
+    close_series = data["Close"].squeeze()
     rsi_series = calculate_rsi(close_series, period=period)
-    rsi_value = float(rsi_series.iloc[-1])
+    rsi_value = float(rsi_series.dropna().iloc[-1])
 
     return rsi_value
 
