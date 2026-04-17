@@ -78,7 +78,7 @@ def get_price_and_change(ticker: str):
 def get_qqq_rsi(period: int = 14):
     data = yf.download(
         "QQQ",
-        period="3mo",
+        period="2y",
         interval="1d",
         auto_adjust=False,
         progress=False
