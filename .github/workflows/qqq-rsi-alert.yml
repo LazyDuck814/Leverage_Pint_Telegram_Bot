@@ -3,7 +3,8 @@ name: QQQ RSI Alert
 on:
   workflow_dispatch:
   schedule:
-    - cron: "45 16 * * *"
+    - cron: "30 23 * * 1-5"
+      timezone: "Asia/Seoul"
 
 jobs:
   run-alert:
