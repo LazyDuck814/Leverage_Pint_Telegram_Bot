@@ -114,8 +114,8 @@ def print_buy_target(ticker: str = "TQQQ", period: str = "1y"):
             print(
                 f"{date.date()} | "
                 f"종가: ${row['close']:.2f} | "
-                f"수익률: {row['return'] * 100:+.2f}% | "
-                f"z-score: {row['z_score']:+.2f} | "
+                f"수익률: {row['return'] * 100:+7.2f}% | "
+                f"z-score: {row['z_score']:+6.2f} | "
                 f"120일선: ${row['ma120']:.2f} | "
                 f"RSI: {row['rsi14']:.2f}"
             )
@@ -129,8 +129,8 @@ def print_buy_target(ticker: str = "TQQQ", period: str = "1y"):
             print(
                 f"{date.date()} | "
                 f"종가: ${row['close']:.2f} | "
-                f"수익률: {row['return'] * 100:+.2f}% | "
-                f"z-score: {row['z_score']:+.2f} | "
+                f"수익률: {row['return'] * 100:+7.2f}% | "
+                f"z-score: {row['z_score']:+6.2f} | "
                 f"120일선: ${row['ma120']:.2f} | "
                 f"RSI: {row['rsi14']:.2f}"
             )
@@ -144,8 +144,8 @@ def print_buy_target(ticker: str = "TQQQ", period: str = "1y"):
             print(
                 f"{date.date()} | "
                 f"종가: ${row['close']:.2f} | "
-                f"수익률: {row['return'] * 100:+.2f}% | "
-                f"z-score: {row['z_score']:+.2f} | "
+                f"수익률: {row['return'] * 100:+7.2f}% | "
+                f"z-score: {row['z_score']:+6.2f} | "
                 f"120일선: ${row['ma120']:.2f} | "
                 f"RSI: {row['rsi14']:.2f}"
             )
