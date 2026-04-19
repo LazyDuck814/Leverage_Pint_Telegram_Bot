@@ -1,0 +1,35 @@
+name: leverage pint alert
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "35 23 * * 1-5"
+      timezone: "Asia/Seoul"
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install yfinance pandas requests python-dotenv
+
+      - name: Run telegram bot
+        run: python tele_bot.py
