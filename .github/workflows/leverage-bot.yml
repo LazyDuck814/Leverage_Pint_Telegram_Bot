@@ -2,10 +2,7 @@ name: leverage pint alert
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "35 23 * * 1-5"
-      timezone: "Asia/Seoul"
-
+  
 jobs:
   run-bot:
     runs-on: ubuntu-latest
