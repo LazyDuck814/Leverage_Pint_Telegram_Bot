@@ -92,7 +92,7 @@ def get_signal_data(ticker: str = "TQQQ", period: str = "1y") -> SignalResult:
     elif rsi30_or_less:
         signal_type = "RSI"
         action_text = "5주 매수"
-    elif ticker.upper() == "TQQQ" and rsi70_or_more:
+    elif ticker.upper() in ["TQQQ", "SOXL"] and rsi70_or_more:
         signal_type = "RSI70"
         action_text = "단계별 비중조절"
     else:
@@ -118,7 +118,7 @@ def get_signal_data(ticker: str = "TQQQ", period: str = "1y") -> SignalResult:
 
 
 def analyze_portfolio(period: str = "1y") -> List[SignalResult]:
-    tickers = ["TQQQ", "QLD"]
+    tickers = ["SOXL", "TQQQ", "QLD"]
     results = []
 
     for ticker in tickers:
