@@ -20,6 +20,8 @@ class SignalResult:
     below_minus_2sigma: bool
     rsi30_or_less: bool
     rsi70_or_more: bool
+    rsi75_or_more: bool
+    rsi80_or_more: bool
     signal_type: str
     action_text: str
 
@@ -79,22 +81,46 @@ def get_signal_data(ticker: str = "TQQQ", period: str = "1y") -> SignalResult:
     below_minus_2sigma = bool(latest["return"] <= minus_2sigma)
     rsi30_or_less = bool(latest["rsi14"] <= 30)
     rsi70_or_more = bool(latest["rsi14"] >= 70)
+    rsi75_or_more = bool(latest["rsi14"] >= 75)
+    rsi80_or_more = bool(latest["rsi14"] >= 80)
 
     signal_type = "NONE"
     action_text = "대기"
 
+    ticker_upper = ticker.upper()
+
     if below_ma120 and below_minus_2sigma and rsi30_or_less:
         signal_type = "BOTH"
         action_text = "15주 매수"
+
     elif below_ma120 and below_minus_2sigma:
         signal_type = "SIGMA"
         action_text = "5주 매수"
+
     elif rsi30_or_less:
         signal_type = "RSI"
         action_text = "5주 매수"
-    elif ticker.upper() in ["TQQQ", "SOXL"] and rsi70_or_more:
-        signal_type = "RSI70"
-        action_text = "단계별 비중조절"
+
+    elif ticker_upper in ["TQQQ", "SOXL"]:
+        if rsi80_or_more:
+            signal_type = "SELL80"
+            if ticker_upper == "TQQQ":
+                action_text = "남은 보유수량의 25% 익절"
+            else:
+                action_text = "남은 물량 전량매도 가능"
+
+        elif rsi75_or_more:
+            signal_type = "SELL75"
+            action_text = "남은 보유수량의 25% 익절"
+
+        elif rsi70_or_more:
+            signal_type = "SELL70"
+            action_text = "남은 보유수량의 25% 익절"
+
+        else:
+            signal_type = "NONE"
+            action_text = "대기"
+
     else:
         signal_type = "NONE"
         action_text = "대기"
@@ -112,6 +138,8 @@ def get_signal_data(ticker: str = "TQQQ", period: str = "1y") -> SignalResult:
         below_minus_2sigma=below_minus_2sigma,
         rsi30_or_less=rsi30_or_less,
         rsi70_or_more=rsi70_or_more,
+        rsi75_or_more=rsi75_or_more,
+        rsi80_or_more=rsi80_or_more,
         signal_type=signal_type,
         action_text=action_text
     )
@@ -136,20 +164,26 @@ def print_signal(result: SignalResult):
     print("-" * 36)
 
     if result.signal_type == "BOTH":
-        print(">>> 120일선, -2σ, RSI 조건 충족")
-        print(f">>> {result.action_text}")
+        print(">> 120일선, -2σ, RSI 조건 충족")
+        print(f">> {result.action_text}")
     elif result.signal_type == "SIGMA":
-        print(">>> 120일선, -2σ 조건 충족")
-        print(f">>> {result.action_text}")
+        print(">> 120일선, -2σ 조건 충족")
+        print(f">> {result.action_text}")
     elif result.signal_type == "RSI":
-        print(">>> RSI 조건 충족")
-        print(f">>> {result.action_text}")
-    elif result.signal_type == "RSI70":
-        print(">>> RSI 70 이상")
-        print(f">>> {result.action_text}")
+        print(">> RSI 조건 충족")
+        print(f">> {result.action_text}")
+    elif result.signal_type == "SELL80":
+        print(">> RSI 80 이상")
+        print(f">> {result.action_text}")
+    elif result.signal_type == "SELL75":
+        print(">> RSI 75 이상")
+        print(f">> {result.action_text}")
+    elif result.signal_type == "SELL70":
+        print(">> RSI 70 이상")
+        print(f">> {result.action_text}")
     else:
-        print(">>> 조건 미충족")
-        print(">>> 대기")
+        print(">> 조건 미충족")
+        print(">> 대기")
     print()
 
 
