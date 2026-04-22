@@ -1,6 +1,7 @@
 import html
 import os
 import requests
+
 from leverage_signal import analyze_portfolio, SignalResult
 
 def send_telegram(message: str):
@@ -42,7 +43,15 @@ def build_section(result: SignalResult) -> str:
         lines.append("&gt;&gt; RSI 조건 충족")
         lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
 
-    elif result.signal_type == "RSI70":
+    elif result.signal_type == "SELL80":
+        lines.append("&gt;&gt; RSI 80 이상")
+        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
+
+    elif result.signal_type == "SELL75":
+        lines.append("&gt;&gt; RSI 75 이상")
+        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
+
+    elif result.signal_type == "SELL70":
         lines.append("&gt;&gt; RSI 70 이상")
         lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
 
