@@ -31,24 +31,24 @@ def build_section(result: SignalResult) -> str:
     ]
 
     if result.signal_type == "BOTH":
-        lines.append("&gt;&gt;&gt; 120일선, -2σ, RSI 조건 충족")
-        lines.append(f"&gt;&gt;&gt; {html.escape(result.action_text)}")
+        lines.append("&gt;&gt; 120일선, -2σ, RSI 조건 충족")
+        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
 
     elif result.signal_type == "SIGMA":
-        lines.append("&gt;&gt;&gt; 120일선, -2σ 조건 충족")
-        lines.append(f"&gt;&gt;&gt; {html.escape(result.action_text)}")
+        lines.append("&gt;&gt; 120일선, -2σ 조건 충족")
+        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
 
     elif result.signal_type == "RSI":
-        lines.append("&gt;&gt;&gt; RSI 조건 충족")
-        lines.append(f"&gt;&gt;&gt; {html.escape(result.action_text)}")
+        lines.append("&gt;&gt; RSI 조건 충족")
+        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
 
     elif result.signal_type == "RSI70":
-        lines.append("&gt;&gt;&gt; RSI 70 이상")
-        lines.append(f"&gt;&gt;&gt; {html.escape(result.action_text)}")
+        lines.append("&gt;&gt; RSI 70 이상")
+        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
 
     else:
-        lines.append("&gt;&gt;&gt; 조건 미충족")
-        lines.append("&gt;&gt;&gt; 대기")
+        lines.append("&gt;&gt; 조건 미충족")
+        lines.append("&gt;&gt; 대기")
 
     return "\n".join(lines)
 
