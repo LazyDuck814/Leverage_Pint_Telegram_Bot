@@ -1,8 +1,8 @@
-import html
 import os
 import requests
 
 from leverage_signal import analyze_portfolio, SignalResult
+
 
 def send_telegram(message: str):
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -15,7 +15,6 @@ def send_telegram(message: str):
     payload = {
         "chat_id": chat_id,
         "text": message,
-        "parse_mode": "HTML"
     }
 
     response = requests.post(url, data=payload, timeout=15)
@@ -24,7 +23,7 @@ def send_telegram(message: str):
 
 def build_section(result: SignalResult) -> str:
     lines = [
-        f"[{html.escape(result.ticker)}]",
+        f"[{result.ticker}]",
         f"• 현재가(등락률) : ${result.close:.2f}({result.daily_return_pct:+.2f}%)",
         f"• 120일선(-2σ) : ${result.ma120:.2f}({result.minus_2sigma_pct:+.2f}%)",
         f"• RSI : {result.rsi14:.1f}",
@@ -32,32 +31,36 @@ def build_section(result: SignalResult) -> str:
     ]
 
     if result.signal_type == "BOTH":
-        lines.append("&gt;&gt; 120일선, -2σ, RSI 조건 충족")
-        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
+        lines.append(">> 120일선, -2σ, RSI 조건 충족")
+        lines.append(f">> {result.action_text}")
 
     elif result.signal_type == "SIGMA":
-        lines.append("&gt;&gt; 120일선, -2σ 조건 충족")
-        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
+        lines.append(">> 120일선, -2σ 조건 충족")
+        lines.append(f">> {result.action_text}")
 
     elif result.signal_type == "RSI":
-        lines.append("&gt;&gt; RSI 조건 충족")
-        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
+        lines.append(">> RSI 조건 충족")
+        lines.append(f">> {result.action_text}")
 
     elif result.signal_type == "SELL80":
-        lines.append("&gt;&gt; RSI 80 이상")
-        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
+        lines.append(">> RSI 80 이상")
+        lines.append(f">> {result.action_text}")
 
     elif result.signal_type == "SELL75":
-        lines.append("&gt;&gt; RSI 75 이상")
-        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
+        lines.append(">> RSI 75 이상")
+        lines.append(f">> {result.action_text}")
 
     elif result.signal_type == "SELL70":
-        lines.append("&gt;&gt; RSI 70 이상")
-        lines.append(f"&gt;&gt; {html.escape(result.action_text)}")
+        lines.append(">> RSI 70 이상")
+        lines.append(f">> {result.action_text}")
 
     else:
-        lines.append("&gt;&gt; 조건 미충족")
-        lines.append("&gt;&gt; 대기")
+        if result.in_sell_zone_hold:
+            lines.append(">> 기존 익절 구간 유지 중")
+            lines.append(">> 추가 행동 없음")
+        else:
+            lines.append(">> 조건 미충족")
+            lines.append(">> 대기")
 
     return "\n".join(lines)
 
@@ -67,24 +70,14 @@ def build_message(results: list[SignalResult]) -> str:
     sections = [build_section(result) for result in results]
 
     return (
-        f"<b>레버리지 핀트</b>\n"
-        f"{html.escape(base_date)}\n\n"
+        f"레버리지 핀트\n"
+        f"{base_date}\n\n"
         + "\n\n".join(sections)
     )
 
 
-def has_any_signal(results: list[SignalResult]) -> bool:
-    return any(r.signal_type != "NONE" for r in results)
-
-
 def main():
     results = analyze_portfolio(period="1y")
-
-    # 신호가 있을 때만 보내고 싶으면 이 줄 유지
-    if not has_any_signal(results):
-        print("조건 미충족: 텔레그램 알림 미전송")
-        return
-
     message = build_message(results)
     send_telegram(message)
     print("텔레그램 알림 전송 완료")
