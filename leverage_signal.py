@@ -1,6 +1,6 @@
 import sys
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import List
 
 import pandas as pd
 import yfinance as yf
@@ -24,6 +24,7 @@ class SignalResult:
     rsi80_or_more: bool
     signal_type: str
     action_text: str
+    in_sell_zone_hold: bool  # 이미 익절 구간 안이지만 신규 돌파는 아닌 상태
 
 
 def calculate_rsi(series: pd.Series, period: int = 14) -> pd.Series:
@@ -71,10 +72,11 @@ def get_signal_data(ticker: str = "TQQQ", period: str = "1y") -> SignalResult:
         "rsi14": rsi14
     }).dropna()
 
-    if df.empty:
+    if len(df) < 2:
         raise ValueError(f"{ticker} 계산 가능한 데이터가 부족합니다.")
 
     latest = df.iloc[-1]
+    prev = df.iloc[-2]
     latest_date = df.index[-1].date().isoformat()
 
     below_ma120 = bool(latest["close"] < latest["ma120"])
@@ -84,8 +86,14 @@ def get_signal_data(ticker: str = "TQQQ", period: str = "1y") -> SignalResult:
     rsi75_or_more = bool(latest["rsi14"] >= 75)
     rsi80_or_more = bool(latest["rsi14"] >= 80)
 
+    prev_rsi14 = float(prev["rsi14"])
+    crossed_70_up = bool(prev_rsi14 < 70 and latest["rsi14"] >= 70)
+    crossed_75_up = bool(prev_rsi14 < 75 and latest["rsi14"] >= 75)
+    crossed_80_up = bool(prev_rsi14 < 80 and latest["rsi14"] >= 80)
+
     signal_type = "NONE"
     action_text = "대기"
+    in_sell_zone_hold = False
 
     ticker_upper = ticker.upper()
 
@@ -102,20 +110,25 @@ def get_signal_data(ticker: str = "TQQQ", period: str = "1y") -> SignalResult:
         action_text = "5주 매수"
 
     elif ticker_upper in ["TQQQ", "SOXL"]:
-        if rsi80_or_more:
+        if crossed_80_up:
             signal_type = "SELL80"
             if ticker_upper == "TQQQ":
                 action_text = "남은 보유수량의 25% 익절"
             else:
                 action_text = "남은 물량 전량매도 가능"
 
-        elif rsi75_or_more:
+        elif crossed_75_up:
             signal_type = "SELL75"
             action_text = "남은 보유수량의 25% 익절"
 
-        elif rsi70_or_more:
+        elif crossed_70_up:
             signal_type = "SELL70"
             action_text = "남은 보유수량의 25% 익절"
+
+        elif rsi70_or_more:
+            signal_type = "NONE"
+            action_text = "추가 행동 없음"
+            in_sell_zone_hold = True
 
         else:
             signal_type = "NONE"
@@ -141,7 +154,8 @@ def get_signal_data(ticker: str = "TQQQ", period: str = "1y") -> SignalResult:
         rsi75_or_more=rsi75_or_more,
         rsi80_or_more=rsi80_or_more,
         signal_type=signal_type,
-        action_text=action_text
+        action_text=action_text,
+        in_sell_zone_hold=in_sell_zone_hold
     )
 
 
@@ -182,8 +196,12 @@ def print_signal(result: SignalResult):
         print(">> RSI 70 이상")
         print(f">> {result.action_text}")
     else:
-        print(">> 조건 미충족")
-        print(">> 대기")
+        if result.in_sell_zone_hold:
+            print(">> 기존 익절 구간 유지 중")
+            print(">> 추가 행동 없음")
+        else:
+            print(">> 조건 미충족")
+            print(">> 대기")
     print()
 
 
