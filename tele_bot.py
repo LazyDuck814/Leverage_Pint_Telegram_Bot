@@ -77,7 +77,9 @@ def build_message(results: list[SignalResult]) -> str:
 
 
 def main():
-    results = analyze_portfolio(period="1y")
+    tickers = ["SOXL", "TQQQ", "QLD", "005930.KS", "000660.KS"]
+
+    results = analyze_portfolio(tickers=tickers, period="1y")
     message = build_message(results)
     send_telegram(message)
     print("텔레그램 알림 전송 완료")
