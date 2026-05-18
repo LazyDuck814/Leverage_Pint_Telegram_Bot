@@ -24,8 +24,8 @@ def send_telegram(message: str):
 def build_section(result: SignalResult) -> str:
     lines = [
         f"[{result.ticker}]",
-        f"• 현재가(등락률) : ${result.close:.2f}({result.daily_return_pct:+.2f}%)",
-        f"• 120일선(-2σ) : ${result.ma120:.2f}({result.minus_2sigma_pct:+.2f}%)",
+        f"• 현재가(등락률) : {result.close:.2f}({result.daily_return_pct:+.2f}%)",
+        f"• 120일선(-2σ) : {result.ma120:.2f}({result.minus_2sigma_pct:+.2f}%)",
         f"• RSI : {result.rsi14:.1f}",
         "--------------------------------------------------",
     ]
