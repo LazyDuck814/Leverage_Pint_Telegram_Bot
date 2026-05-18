@@ -159,8 +159,7 @@ def get_signal_data(ticker: str = "TQQQ", period: str = "1y") -> SignalResult:
     )
 
 
-def analyze_portfolio(period: str = "1y") -> List[SignalResult]:
-    tickers = ["SOXL", "TQQQ", "QLD"]
+def analyze_portfolio(tickers: List[str], period: str = "1y") -> List[SignalResult]:
     results = []
 
     for ticker in tickers:
@@ -206,6 +205,7 @@ def print_signal(result: SignalResult):
 
 
 if __name__ == "__main__":
+    tickers = ["SOXL", "TQQQ", "QLD"]
     period = "1y"
 
     if len(sys.argv) >= 2:
@@ -215,6 +215,6 @@ if __name__ == "__main__":
         else:
             period = f"{raw_period}y"
 
-    results = analyze_portfolio(period=period)
+    results = analyze_portfolio(tickers=tickers, period=period)
     for item in results:
         print_signal(item)
