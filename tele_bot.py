@@ -43,15 +43,15 @@ def build_section(result: SignalResult) -> str:
         lines.append(f">> {result.action_text}")
 
     elif result.signal_type == "SELL80":
-        lines.append(">> RSI 80 이상")
+        lines.append(">> RSI 80 상향 돌파")
         lines.append(f">> {result.action_text}")
-
+    
     elif result.signal_type == "SELL75":
-        lines.append(">> RSI 75 이상")
+        lines.append(">> RSI 75 상향 돌파")
         lines.append(f">> {result.action_text}")
-
+    
     elif result.signal_type == "SELL70":
-        lines.append(">> RSI 70 이상")
+        lines.append(">> RSI 70 상향 돌파")
         lines.append(f">> {result.action_text}")
 
     else:
