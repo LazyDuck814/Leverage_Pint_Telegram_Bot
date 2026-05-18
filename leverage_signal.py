@@ -187,13 +187,13 @@ def print_signal(result: SignalResult):
         print(">> RSI 조건 충족")
         print(f">> {result.action_text}")
     elif result.signal_type == "SELL80":
-        print(">> RSI 80 이상")
+        print(">> RSI 80 상향 돌파")
         print(f">> {result.action_text}")
     elif result.signal_type == "SELL75":
-        print(">> RSI 75 이상")
+        print(">> RSI 75 상향 돌파")
         print(f">> {result.action_text}")
     elif result.signal_type == "SELL70":
-        print(">> RSI 70 이상")
+        print(">> RSI 70 상향 돌파")
         print(f">> {result.action_text}")
     else:
         if result.in_sell_zone_hold:
