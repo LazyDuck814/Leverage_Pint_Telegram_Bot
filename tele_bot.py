@@ -77,7 +77,7 @@ def build_message(results: list[SignalResult]) -> str:
 
 
 if __name__ == "__main__":
-    tickers = ["SOXL", "TQQQ", "QLD"] #["005930.KS", "000660.KS"]
+    tickers = ["SOXL", "TQQQ", "QLD", "005930.KS", "000660.KS"]
 
     results = analyze_portfolio(tickers=tickers, period="1y")
     message = build_message(results)
